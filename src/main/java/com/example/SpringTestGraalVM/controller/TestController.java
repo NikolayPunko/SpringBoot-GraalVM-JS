@@ -1,18 +1,19 @@
 package com.example.SpringTestGraalVM.controller;
+
 import com.example.SpringTestGraalVM.configuration.JavaScriptConfiguration;
 import com.example.SpringTestGraalVM.model.Person;
+import com.example.SpringTestGraalVM.model.ScriptContext;
+import com.example.SpringTestGraalVM.pools.ContextPoolFile1;
 import com.example.SpringTestGraalVM.service.JavaScriptService1;
-import com.example.SpringTestGraalVM.service.JavaScriptService2;
+import com.example.SpringTestGraalVM.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.SpringTestGraalVM.configurationDev.JavaScriptConfigurationDev;
 
-import java.io.IOException;
+import static java.lang.Thread.sleep;
 
 
 @RestController
@@ -20,63 +21,88 @@ import java.io.IOException;
 public class TestController {
 
     @Autowired
-    DefaultListableBeanFactory beanFactory;
-
-    @Autowired
-    ApplicationContext applicationContext;
-
-    @Autowired
     JavaScriptConfiguration javaScriptConfiguration;
 
-    private final JavaScriptService1 javaScriptService1;
+    @Autowired
+    TestService testService;
 
-    private final JavaScriptService2 javaScriptService2;
-
-    public TestController(JavaScriptService1 javaScriptService1, JavaScriptService2 javaScriptService2) {
-        this.javaScriptService1 = javaScriptService1;
-        this.javaScriptService2 = javaScriptService2;
-    }
-
-    @GetMapping("/reload")
-    public void testMethod0() throws IOException {
-//        beanFactory.destroySingleton("getJavaScriptBean");
+    public TestController() {
 
     }
 
+    @GetMapping("/reset-source-script") //обновить скрипты
+    public void testMethod11() {
+        JavaScriptConfigurationDev.assignSource();
+    }
+
+
+    //    @CrossOrigin(origins = "*")
     @GetMapping("/method1")
-    public int testMethod1() {
-//        return javaScriptService1.testMethod_1(5, 10); // через @Bean
-        return JavaScriptConfigurationDev.getJavaScriptBean1().testMethod_1(5, 10); //через обычный Java класс
+    public int testMethod1() throws InterruptedException {
+//        synchronized (JavaScriptConfiguration.context) {
+//            return javaScriptService1.testMethod_1(5, 10);
+//        }
+
+        ScriptContext context = ContextPoolFile1.borrowContext();// исп. пул контекстов
+        int result = JavaScriptConfigurationDev.getJavaScriptService1(context).testMethod_1(5, 10);
+        ContextPoolFile1.returnContext(context);
+        return result;
     }
 
 
     @GetMapping("/method2")
-    public String testMethod2() throws IOException {
-//        return javaScriptService.testMethod_2(); // через @Bean
-        return JavaScriptConfigurationDev.getJavaScriptBean1().testMethod_2(); //через обычный Java класс
+    public String testMethod2() throws InterruptedException {
+
+//        synchronized (JavaScriptConfiguration.context) { // если использовать один контекст
+//           return str = javaScriptService1.testMethod_2();
+//        }
+
+        ScriptContext context = ContextPoolFile1.borrowContext();// исп. пул контекстов
+        String str = JavaScriptConfigurationDev.getJavaScriptService1(context).testMethod_2();
+        ContextPoolFile1.returnContext(context);
+        return str;
     }
 
+
     @GetMapping("/method3")
-    public String testMethod3() {
-//        return javaScriptService1.testMethod_3(new Person("Ivan",35)); // через @Bean
-        return JavaScriptConfigurationDev.getJavaScriptBean1().testMethod_3(new Person("Ivan",35)); //через обычный Java класс
+    public String testMethod3() throws InterruptedException {
+
+//        synchronized (JavaScriptConfiguration.context) {
+//            return javaScriptService1.testMethod_3(new Person("Ivan", 35));
+//        }
+
+        ScriptContext context = ContextPoolFile1.borrowContext();// исп. пул контекстов
+        String str = JavaScriptConfigurationDev.getJavaScriptService1(context).testMethod_3(new Person("Ivan", 35));
+        ContextPoolFile1.returnContext(context);
+        return str;
     }
 
     @GetMapping("/method4")
-    public Person testMethod4() {
-//        return javaScriptService1.testMethod_4(new Person("Ivan",35)); // через @Bean
-        return JavaScriptConfigurationDev.getJavaScriptBean1().testMethod_4(new Person("Ivan",35));  //через обычный Java класс
+    public Person testMethod4() throws InterruptedException {
+
+//        synchronized (JavaScriptConfiguration.context) {
+//            return javaScriptService1.testMethod_4(new Person("Ivan", 35));
+//        }
+
+        ScriptContext context = ContextPoolFile1.borrowContext();// исп. пул контекстов
+        Person person = JavaScriptConfigurationDev.getJavaScriptService1(context).testMethod_4(new Person("Ivan", 35));
+        ContextPoolFile1.returnContext(context);
+        return person;
     }
 
 
-    // второй скрипт
-
-    @GetMapping("/method5")
-    public String testMethod5() {
-//        return javaScriptService2.testMethod_1();  // через @Bean
-        return JavaScriptConfigurationDev.getJavaScriptBean2().testMethod_1(); //через обычный Java класс
-    }
 
 
 
+    //    @GetMapping("/test{id}")
+//    public String testMethod0(@PathVariable("id") int id) throws InterruptedException {
+//        System.out.println("request id: "+ id +"; Стартовал; Thread: " + currentThread().getName());
+//        Thread.sleep(x);
+//        System.out.println("request id: "+ id +"; Продолжил; Thread: " + currentThread().getName());
+////        String result = testService.testWithAsync("request id: "+ id +"; Закончил; Thread: " + currentThread().getName()).join();
+//        String result = testService.testWithoutAsync("request id: "+ id +"; Закончил; Thread: " + currentThread().getName());
+//        testService.testWithAsyncVoid();
+//        System.out.println(result);
+//        return result;
+//    }
 }

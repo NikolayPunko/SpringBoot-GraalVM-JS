@@ -1,9 +1,7 @@
 package com.example.SpringTestGraalVM.configurationDev;
 
+import com.example.SpringTestGraalVM.model.ScriptContext;
 import com.example.SpringTestGraalVM.service.JavaScriptService1;
-import com.example.SpringTestGraalVM.service.JavaScriptService2;
-import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Source;
 
 import java.io.File;
@@ -11,50 +9,26 @@ import java.io.IOException;
 
 
 public class JavaScriptConfigurationDev {
+    private static Source sourceFile1;
 
-    private final static Context context = Context
-            .newBuilder("js")
-            .allowHostAccess(HostAccess.ALL)
-            .allowAllAccess(true)
-            .build();
-    public static JavaScriptService1 getJavaScriptBean1()  {
-        File file = new File("C:\\Users\\User\\Desktop\\GraalVMProjects\\Spring-Test-GraalVM-JS\\src\\main\\resources\\static\\JavaScript\\TestJavaScript1.js");
-
-        Source source = null;
-        try {
-            source = Source
-                    .newBuilder("js", file)
-                    .build();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        context.eval(source);
-
-        return context
-                .getBindings("js")
-                .as(JavaScriptService1.class)
-                ;
+    static {
+      assignSource();
     }
 
-
-    public static JavaScriptService2 getJavaScriptBean2() {
-        File file = new File("C:\\Users\\User\\Desktop\\GraalVMProjects\\Spring-Test-GraalVM-JS\\src\\main\\resources\\static\\JavaScript\\TestJavaScript2.js");
-
-        Source source = null;
+    public static void assignSource(){ //метод для обновления скрипта без перезагрузки приложения
         try {
-            source = Source
-                    .newBuilder("js", file)
+            sourceFile1 = Source
+                    .newBuilder("js", new File("C:\\Users\\User\\Desktop\\GraalVMProjects\\Spring-Test-GraalVM-JS\\src\\main\\resources\\static\\JavaScript\\TestJavaScript1.js"))
                     .build();
         } catch (IOException e) {
+            System.out.println("script not found!");
             throw new RuntimeException(e);
         }
-
-        context.eval(source);
-
-        return context
-                .getBindings("js")
-                .as(JavaScriptService2.class)
-                ;
     }
+
+    public static JavaScriptService1 getJavaScriptService1(ScriptContext scriptContext) {
+        return scriptContext.getContext().eval(sourceFile1).getContext().getBindings("js")
+                .as(JavaScriptService1.class);
+    }
+
 }

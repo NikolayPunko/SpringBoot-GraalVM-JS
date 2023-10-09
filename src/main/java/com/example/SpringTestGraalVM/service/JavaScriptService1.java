@@ -1,8 +1,13 @@
 package com.example.SpringTestGraalVM.service;
 
 import com.example.SpringTestGraalVM.model.Person;
+import org.graalvm.polyglot.Value;
+
 
 public interface JavaScriptService1 {
+
+
+    String testMethod_0(String str);
 
     int testMethod_1(int a, int b);
 
