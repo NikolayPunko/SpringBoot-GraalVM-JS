@@ -31,7 +31,7 @@ public class TestController {
     }
 
     @GetMapping("/reset-source-script") //обновить скрипты
-    public void testMethod11() {
+    public void resetSourceScript() {
         JavaScriptConfigurationDev.assignSource();
     }
 
